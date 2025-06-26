@@ -46,5 +46,53 @@
     </footer>
 
     <script src="app.js"></script>
+    <script>
+      // Agrega la lógica para mostrar los participantes en cada tarjeta de actividad
+      document.addEventListener("DOMContentLoaded", async () => {
+        const activitiesList = document.getElementById("activities-list");
+        const activitySelect = document.getElementById("activity");
+
+        try {
+          const res = await fetch("/activities");
+          const activities = await res.json();
+
+          activitiesList.innerHTML = "";
+          activitySelect.innerHTML = '<option value="">-- Select an activity --</option>';
+
+          Object.entries(activities).forEach(([name, info]) => {
+            // Crear la tarjeta de actividad
+            const card = document.createElement("div");
+            card.className = "activity-card";
+
+            card.innerHTML = `
+              <h4>${name}</h4>
+              <p><strong>Description:</strong> ${info.description}</p>
+              <p><strong>Schedule:</strong> ${info.schedule}</p>
+              <p><strong>Max Participants:</strong> ${info.max_participants}</p>
+              <div class="participants-section">
+                <strong>Participants:</strong>
+                ${
+                  info.participants && info.participants.length > 0
+                    ? `<ul class="participants-list">
+                        ${info.participants.map(email => `<li>${email}</li>`).join("")}
+                      </ul>`
+                    : `<span class="no-participants">No participants yet.</span>`
+                }
+              </div>
+            `;
+
+            activitiesList.appendChild(card);
+
+            // Agregar opción al select
+            const option = document.createElement("option");
+            option.value = name;
+            option.textContent = name;
+            activitySelect.appendChild(option);
+          });
+        } catch (err) {
+          activitiesList.innerHTML = "<p class='error'>Failed to load activities.</p>";
+        }
+      });
+    </script>
   </body>
 </html>
